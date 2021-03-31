@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class LeastRecentUse {
     /**
      * 设计LRU缓存结构，该结构在构造时确定大小，假设大小为K，并有如下两个功能
@@ -21,12 +23,58 @@ public class LeastRecentUse {
      * @param k
      * @return
      */
-    public int[] LRU (int[][] operators, int k) {
-        // write code here
-        return null;
+    public static int[] LRU(int[][] operators, int k) {
+        Queue<Integer> q = new LinkedList<>();
+        ArrayList<Integer> list = new ArrayList<>();
+        HashMap<Integer, Integer> map = new HashMap<>();
+        for (int i = 0;i<operators.length;i++){
+            if (operators[i][0]==1){        //set操作
+                map.put(operators[i][1],operators[i][2]);
+                if (!q.contains(operators[i][1])){      //set新值
+                    if (q.size()<k){
+                        q.offer(operators[i][1]);
+                    }else{
+                        Integer head = q.poll();
+                        map.remove(head);
+                        q.offer(operators[i][1]);
+                    }
+                }else{                                  //set已有值
+                    q = makeQueue(q, operators[i][1]);
+                }
+            }else{                          //get操作
+                Integer value = map.get(operators[i][1]);
+                if (value!=null){
+                    list.add(value);
+                }else{
+                    list.add(-1);
+                }
+                q = makeQueue(q, operators[i][1]);
+
+            }
+        }
+        Integer[] a = list.toArray(new Integer[list.size()]);
+
+        return list.stream().mapToInt(Integer::valueOf).toArray();
+    }
+
+    private static Queue<Integer> makeQueue(Queue<Integer> q, int i) {
+        Integer tmp = null;
+        int size = q.size();
+        for (int j = 0; j < size; j++) {
+            Integer temp = q.poll();
+            if(temp!=null && temp==i){
+                tmp = temp;
+            }else{
+                q.offer(temp);
+            }
+        }
+        q.offer(tmp);
+        return q;
     }
 
     public static void main(String[] args) {
-
+        int[][] k = {{1,-324690837,-72487934},{1,-723504364,-369145172},{2,-324690837},{1,724101438,-30727452},{1,366967562,290286156},{2,366967562},{1,-21417066,-450706222},{1,-484359960,-121414361},{1,-629538923,-759874959},{1,-461538894,749719150},{1,-338664886,-3080586},{2,522415046},{1,134352387,-391032350},{1,283492390,210901529},{2,-328994470},{2,-254674447},{2,85161833}};
+        int[] lru = LRU(k, 3);
+        System.out.println(Arrays.toString(lru));
     }
 }
